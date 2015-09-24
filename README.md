@@ -7,9 +7,13 @@ Developed for Python 2.7
 # Usage
 
 x = Layer 3 switch or router
+
 y = username
+
 z = password
+
 a = IP to find port for
+
 
 λ python findport.py x y z z
 
