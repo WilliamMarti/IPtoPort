@@ -11,6 +11,7 @@ y = username
 z = password
 a = IP to find port for
 
-python findport.py x y z z
+λ python findport.py x y z z
 
 #Example
+λ python findip.py myrouter.test.com username password 10.10.10.2
