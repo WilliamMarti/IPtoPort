@@ -14,7 +14,7 @@ z = password
 
 a = IP to find port for
 
-
+---
 λ python findport.py x y z z
 
 #Example
