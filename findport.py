@@ -78,8 +78,9 @@ def main(hostname, username, password, searchip):
   output = str(output)
   output = output.split()
 
+  
   port = output[18]
-
+  print port
 
   #need to find the physical switchports that are port of the PC
   if "channel" in port:
@@ -94,17 +95,29 @@ def main(hostname, username, password, searchip):
     #tells us if there is a layer 2 device on the other end or an end device
     
     neighborresult = hasNeighbor(ssh2, ports[0])
-    getNeighbor(ssh2, ports[0])
+ 
+    print "Port: " + ports[0]
+ 
+    #if the port channel is a switch, server or WLC
+    if(neighborresult == True ):
+
+      print getNeighbor(ssh2, ports[0])
+    
+    else:
+
+      print port 
 
   else:
 
     neighborresult = hasNeighbor(ssh2, port)
-    getNeighbor(ssh2, port)
+     
 
-
+    nexthost = getNeighbor(ssh2, port)[:11]
+    
+    print goToNeighbor(nexthost, username, password, macaddress)
   #print neighborresult
 
-  getNeighbor(ssh2, port)
+  #getNeighbor(ssh2, port)
 
 
   ts = time.time()
@@ -119,7 +132,39 @@ def main(hostname, username, password, searchip):
   #close session
   ssh2.close();
 
-#check to see if physical port has a neighbor
+
+def goToNeighbor(neighbor, username, password, macaddress):
+
+  tcpport = 22
+
+  try:
+
+    
+    sshnext = paramiko.SSHClient()
+    sshnext.set_missing_host_key_policy(paramiko.AutoAddPolicy())
+    sshnext.connect(neighbor,tcpport,username,password)
+    sshnext2 = sshnext.invoke_shell()
+
+  except:
+
+    print "Could not connect to host"
+    sys.exit()
+
+
+  shmacaddress = "sh mac address-table address " + macaddress
+
+  
+  output = runCommand(sshnext2,shmacaddress)
+  output = str(output)
+  output = output.split()
+
+  
+  port = output[21]
+  return port
+
+
+
+#check to see if physical port has a network device neighbor
 #returns True of False
 def hasNeighbor(ssh, port):
 
@@ -159,8 +204,6 @@ def getNeighbor(ssh, port):
   neighbor = str(neighbor)
   neighbor = neighbor.split()
 
- 
-
   neighborname = neighbor[53]
 
   return neighborname
@@ -189,9 +232,6 @@ def getSwitchportsFromPC(ssh, portchannelnum):
   members = members[10] + "|"  + members[11]
 
   return members
-
-
-
 
 #boiler plate setup
 if __name__ == "__main__":
