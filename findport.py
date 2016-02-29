@@ -10,7 +10,8 @@ import paramiko, sys, time, datetime, time
 #hostname = gateway of address
 def main(hostname, username, password, searchip):
 
-  
+  stepcount = 1
+
   tcpport = 22
 
   
@@ -31,7 +32,7 @@ def main(hostname, username, password, searchip):
     sys.exit()
 
 
-  
+  print "1. " + hostname
 
   ssh2.send("\n")
   output = ssh2.recv(5000)
@@ -80,7 +81,7 @@ def main(hostname, username, password, searchip):
 
   
   port = output[18]
-  print port
+  print "Port: " + port
 
   #need to find the physical switchports that are port of the PC
   if "channel" in port:
@@ -101,8 +102,11 @@ def main(hostname, username, password, searchip):
     #if the port channel is a switch, server or WLC
     if(neighborresult == True ):
 
-      print getNeighbor(ssh2, ports[0])
-    
+      nexthost = getNeighbor(ssh2, port)[:11]
+
+      print goToNeighbor(nexthost, username, password, macaddress, stepcount)
+
+
     else:
 
       print port 
@@ -111,10 +115,11 @@ def main(hostname, username, password, searchip):
 
     neighborresult = hasNeighbor(ssh2, port)
      
+    if(neighborresult):
 
-    nexthost = getNeighbor(ssh2, port)[:11]
+      nexthost = getNeighbor(ssh2, port)[:11]
     
-    print goToNeighbor(nexthost, username, password, macaddress)
+      print goToNeighbor(nexthost, username, password, macaddress, stepcount)
   #print neighborresult
 
   #getNeighbor(ssh2, port)
@@ -133,7 +138,9 @@ def main(hostname, username, password, searchip):
   ssh2.close();
 
 
-def goToNeighbor(neighbor, username, password, macaddress):
+def goToNeighbor(neighbor, username, password, macaddress, stepcount):
+
+  print "got here:"
 
   tcpport = 22
 
@@ -150,6 +157,9 @@ def goToNeighbor(neighbor, username, password, macaddress):
     print "Could not connect to host"
     sys.exit()
 
+  stepcount += 1
+
+  print stepcount + ". Switch" + neighbor
 
   shmacaddress = "sh mac address-table address " + macaddress
 
@@ -160,7 +170,7 @@ def goToNeighbor(neighbor, username, password, macaddress):
 
   
   port = output[21]
-  return port
+  return "Port: " + port
 
 
 
